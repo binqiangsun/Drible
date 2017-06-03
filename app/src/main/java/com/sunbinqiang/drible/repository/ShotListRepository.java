@@ -11,6 +11,7 @@ import com.sunbinqiang.drible.db.dao.ShotDao;
 import com.sunbinqiang.drible.db.entity.Shot;
 
 import java.io.IOException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -100,31 +101,33 @@ public class ShotListRepository {
 
     private void compareAndInsertDb(List<Shot> dbShots, List<Shot> netShots){
         if (netShots == null) {
+            Log.d("shotReposi", "net is null");
             return;
         } else if (dbShots == null) {
             shotDao.insertAll(netShots);
+            Log.d("shotReposi", "db is null");
             return;
         }
 
-        //compare
-//        if(dbShots.size() != netShots.size()) {
-//            shotDao.deleteShots();
-//            shotDao.insertAll(netShots);
-//        }
-//        ListIterator<Shot> e1 = dbShots.listIterator();
-//        ListIterator<Shot> e2 = netShots.listIterator();
-//
-//        while (e1.hasNext() && e2.hasNext()) {
-//            Shot o1 = e1.next();
-//            Shot o2 = e2.next();
-//            if (!(o1==null ? o2==null : o1.equals(o2))) {
-//                //not equal
-//                shotDao.deleteShots();
-//                shotDao.insertAll(netShots);
-//                return;
-//            }
-//        }
-        Log.d("shotReposi", "db is equal to net");
+        AbstractList<Shot> dbShotList = new ArrayList<>(dbShots);
+        AbstractList<Shot> netShotList = new ArrayList<>(netShots);
+        if (!dbShotList.equals(netShotList)) {
+            // not equal
+            insertDbShots(netShots);
+            Log.d("shotReposi", "db is not equal to net");
+        } else {
+            Log.d("shotReposi", "db is equal to net");
+        }
+    }
+
+    private void insertDbShots(List<Shot> netShots){
+        //数据库中记录初始顺序
+        int index = 0;
+        for (Shot shot : netShots) {
+            shot.setInd(index ++);
+        }
+        shotDao.deleteShots();
+        shotDao.insertAll(netShots);
     }
 
 }

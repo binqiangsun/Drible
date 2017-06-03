@@ -22,10 +22,10 @@ public interface ShotDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Shot> shots);
 
-    @Query("select * from shots")
+    @Query("select * from shots order by shots.ind asc")
     LiveData<List<Shot>> loadShots();
 
-    @Query("select * from shots")
+    @Query("select * from shots order by shots.ind asc")
     List<Shot> loadShotSync();
 
     @Query("delete from shots")

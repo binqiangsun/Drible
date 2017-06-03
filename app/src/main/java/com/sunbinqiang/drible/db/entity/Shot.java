@@ -78,6 +78,7 @@ public class Shot implements Parcelable {
     private String projects_url;
     private String rebounds_url;
     private boolean animated;
+    private int ind;
     /**
      * id : 13307
      * name : Mike | Creative Mints
@@ -153,6 +154,7 @@ public class Shot implements Parcelable {
         tags = in.createStringArrayList();
         images = in.readParcelable(IMAGEENTITY_CL);
         user = in.readParcelable(USER_CL);
+        ind = in.readInt();
     }
 
     public static final Creator<Shot> CREATOR = new Creator<Shot>() {
@@ -396,6 +398,14 @@ public class Shot implements Parcelable {
         this.tags = tags;
     }
 
+    public void setInd(int index) {
+        this.ind = index;
+    }
+
+    public int getInd() {
+        return ind;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -427,6 +437,7 @@ public class Shot implements Parcelable {
         dest.writeStringList(tags);
         dest.writeParcelable(images, flags);
         dest.writeParcelable(user, flags);
+        dest.writeInt(ind);
     }
 
     @Override
