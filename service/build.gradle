@@ -17,6 +17,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dataBinding {
+        enabled = true
+    }
 }
 
 dependencies {
@@ -28,4 +31,8 @@ dependencies {
     compile 'com.squareup.retrofit2:adapter-rxjava:+'
     compile "com.android.support:design:${ANDROID_SUPPORT_VERSION}"
     compile "com.android.support:support-core-utils:${ANDROID_SUPPORT_VERSION}"
+    compile "com.android.support.constraint:constraint-layout:${CONSTRAINT_LAYOUT_VERSION}"
+    compile "android.arch.lifecycle:runtime:1.0.0-alpha1"
+    compile "android.arch.lifecycle:extensions:1.0.0-alpha1"
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0-alpha1"
 }

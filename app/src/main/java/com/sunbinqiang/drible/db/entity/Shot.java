@@ -59,8 +59,6 @@ public class Shot implements Parcelable {
      * normal : https://d13yacurqjgara.cloudfront.net/users/13307/screenshots/2485306/whisky_logotype_design_1x.jpg
      * teaser : https://d13yacurqjgara.cloudfront.net/users/13307/screenshots/2485306/whisky_logotype_design_teaser.jpg
      */
-
-    @Ignore
     private ImageEntity images;
     private int views_count;
     private int likes_count;
@@ -112,7 +110,6 @@ public class Shot implements Parcelable {
      * updated_at : 2016-01-27T12:31:45Z
      */
 
-    @Ignore
     private User user;
     @Ignore
     private Object team;

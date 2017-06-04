@@ -1,9 +1,6 @@
 package com.sunbinqiang.drible;
 
 import com.lukou.service.LibApplication;
-import com.lukou.service.account.AccountService;
-import com.lukou.service.config.ConfigService;
-import com.lukou.service.debug.DebugService;
 import com.sunbinqiang.drible.db.DatabaseCreator;
 
 /**
@@ -18,18 +15,4 @@ public class MainApplication extends LibApplication {
         DatabaseCreator.getInstance().createDb(this);
     }
 
-    @Override
-    public ConfigService configService() {
-        return null;
-    }
-
-    @Override
-    public AccountService accountService() {
-        return null;
-    }
-
-    @Override
-    public DebugService debugService() {
-        return null;
-    }
 }

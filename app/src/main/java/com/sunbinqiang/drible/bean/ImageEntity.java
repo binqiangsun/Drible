@@ -3,6 +3,8 @@ package com.sunbinqiang.drible.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.google.gson.Gson;
+
 /**
  * Created by sunbinqiang on 16/2/2.
  */
@@ -63,5 +65,9 @@ public class ImageEntity implements Parcelable {
         dest.writeString(hidpi);
         dest.writeString(normal);
         dest.writeString(teaser);
+    }
+
+    public String toJsonString() {
+        return new Gson().toJson(this);
     }
 }

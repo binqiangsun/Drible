@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Service</string>
+    <string name="loading_error_text">load error</string>
+    <string name="loading_text">loading...</string>
 </resources>

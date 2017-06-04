@@ -11,13 +11,12 @@ import com.sunbinqiang.drible.db.dao.ShotDao;
 import com.sunbinqiang.drible.db.entity.Shot;
 
 import java.io.IOException;
-import java.util.AbstractList;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
@@ -25,6 +24,8 @@ import retrofit2.Response;
  */
 
 public class ShotListRepository {
+
+    private static final int MAX_CACHE_PAGE = 3; //前3页内容缓存数据库
 
     private static final MutableLiveData ABSENT = new MutableLiveData();
     {
@@ -34,7 +35,6 @@ public class ShotListRepository {
 
     private ShotDao shotDao;
     private ExecutorService executor;
-    private LiveData<List<Shot>> mObservableShots;
 
     private static ShotListRepository instance;
 
@@ -49,18 +49,46 @@ public class ShotListRepository {
         return instance;
     }
 
-    public ShotListRepository() {
+    private ShotListRepository() {
         this.executor = Executors.newSingleThreadExecutor();
     }
 
-    public LiveData<List<Shot>> getSelectedShots(final int page){
+    /**
+     *
+     * @param page
+     * @return
+     */
+    public LiveData<Shot[]> getSelectedShots(final int page){
+        if (page < MAX_CACHE_PAGE) {
+            return getShotsFromDb(page);
+        } else {
+            return getShotsFromNet(page);
+        }
+    }
 
+    private LiveData<Shot[]> getShotsFromNet(int page){
+        final MutableLiveData<Shot[]> data = new MutableLiveData<>();
+        RepositoryUtils.getApiService().getShots(page).enqueue(new Callback<Shot[]>() {
+            @Override
+            public void onResponse(Call<Shot[]> call, Response<Shot[]> response) {
+                // error case is left out for brevity
+                data.setValue(response.body());
+            }
 
+            @Override
+            public void onFailure(Call<Shot[]> call, Throwable t) {
+
+            }
+        });
+        return data;
+    }
+
+    private LiveData<Shot[]> getShotsFromDb(final int page) {
         LiveData<Boolean> databaseCreated = DatabaseCreator.getInstance().isDatabaseCreated();
-        mObservableShots = Transformations.switchMap(databaseCreated,
-                new Function<Boolean, LiveData<List<Shot>>>() {
+        final LiveData<Shot[]> data = Transformations.switchMap(databaseCreated,
+                new Function<Boolean, LiveData<Shot[]>>() {
                     @Override
-                    public LiveData<List<Shot>> apply(Boolean isDbCreated) {
+                    public LiveData<Shot[]> apply(Boolean isDbCreated) {
                         if (!Boolean.TRUE.equals(isDbCreated)) { // Not needed here, but watch out for null
                             Log.d("shotRepository", "1, database is not created ");
                             return ABSENT;
@@ -75,7 +103,7 @@ public class ShotListRepository {
                         }
                     }
                 });
-        return mObservableShots;
+        return data;
     }
 
     private void refreshShots(final int page){
@@ -87,9 +115,8 @@ public class ShotListRepository {
                     if (response == null || response.body() == null) {
                         return;
                     }
-                    List<Shot> shots = new ArrayList<>(Arrays.asList(response.body()));
-                    Log.d("shotRepository", "3, get network is : " + String.valueOf(shots == null ? 0 : shots.size()));
-                    if (page == 0) {
+                    Shot[] shots = response.body();
+                    if (page < MAX_CACHE_PAGE) {
                         compareAndInsertDb(shotDao.loadShotSync(), shots);
                     }
                 } catch (IOException e) {
@@ -99,7 +126,7 @@ public class ShotListRepository {
         });
     }
 
-    private void compareAndInsertDb(List<Shot> dbShots, List<Shot> netShots){
+    private void compareAndInsertDb(Shot[] dbShots, Shot[] netShots){
         if (netShots == null) {
             Log.d("shotReposi", "net is null");
             return;
@@ -109,9 +136,7 @@ public class ShotListRepository {
             return;
         }
 
-        AbstractList<Shot> dbShotList = new ArrayList<>(dbShots);
-        AbstractList<Shot> netShotList = new ArrayList<>(netShots);
-        if (!dbShotList.equals(netShotList)) {
+        if (!Arrays.equals(dbShots, netShots)) {
             // not equal
             insertDbShots(netShots);
             Log.d("shotReposi", "db is not equal to net");
@@ -120,7 +145,7 @@ public class ShotListRepository {
         }
     }
 
-    private void insertDbShots(List<Shot> netShots){
+    private void insertDbShots(Shot[] netShots){
         //数据库中记录初始顺序
         int index = 0;
         for (Shot shot : netShots) {

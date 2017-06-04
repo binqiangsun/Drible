@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="NetworkImageView">
+        <attr name="imageUrl" format="string" />
+        <attr name="enableCircle" format="boolean" />
+        <attr name="roundRadius" format="integer" />
+        <attr name="aspectRatio" format="float" />
+        <attr name="defaultPlaceholderImage" format="reference" />
+        <attr name="maskGradientScrimColor" format="color|reference" />
+        <attr name="maskGradientScrimGravity" format="enum">
+            <enum name="top" value="1" />
+            <enum name="center" value="2" />
+            <enum name="bottom" value="3" />
+        </attr>
+    </declare-styleable>
+</resources>

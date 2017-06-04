@@ -1,22 +1,25 @@
 package com.sunbinqiang.drible.ui;
 
 import android.arch.lifecycle.LifecycleFragment;
-import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
+import android.support.v7.widget.GridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lukou.service.list.adapter.BaseListRecyclerViewAdapter;
+import com.lukou.service.list.adapter.ListRecyclerViewAdapter;
+import com.lukou.service.list.viewholder.BaseViewHolder;
 import com.sunbinqiang.drible.R;
 import com.sunbinqiang.drible.databinding.ListFragmentBinding;
 import com.sunbinqiang.drible.db.entity.Shot;
 import com.sunbinqiang.drible.viewmodel.ShotListViewModel;
-
-import java.util.List;
 
 /**
  * Created by sunbinqiang on 01/06/2017.
@@ -32,23 +35,15 @@ public class SelectedShotFragment extends LifecycleFragment {
         super.onActivityCreated(savedInstanceState);
         viewModel = ViewModelProviders.of(this).get(ShotListViewModel.class);
 
-        subscribeUi(viewModel);
+        initView(viewModel);
     }
 
-    private void subscribeUi(ShotListViewModel viewModel) {
-        // Update the list when the data changes
-        viewModel.getShots(0).observe(this, new Observer<List<Shot>>() {
-            @Override
-            public void onChanged(@Nullable List<Shot> shots) {
-                if (shots != null && shots.size() > 0) {
-                    Log.d("shotFragment", "data changed");
-                    binding.loadingTv.setText(String.valueOf(shots.get(0).getDescription()));
-                } else {
-                    Log.d("shotFragment", "data changed null");
-                    binding.loadingTv.setText("loading...");
-                }
-            }
-        });
+    private void initView(ShotListViewModel viewModel) {
+        ShotAdapter shotAdapter = new ShotAdapter(this, viewModel);
+        GridLayoutManager manager = new GridLayoutManager(getContext(), 2);
+        manager.setSpanSizeLookup(BaseListRecyclerViewAdapter.getSpanSizeLookup(shotAdapter));
+        binding.recyclerView.setLayoutManager(manager);
+        binding.recyclerView.setAdapter(shotAdapter);
     }
 
     @Override
@@ -56,5 +51,31 @@ public class SelectedShotFragment extends LifecycleFragment {
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.list_fragment, container, false);
         return binding.getRoot();
+    }
+
+
+    private static class ShotAdapter extends ListRecyclerViewAdapter<Shot> {
+
+        private ShotListViewModel viewModel;
+
+        public ShotAdapter(LifecycleOwner lifecycleOwner, ShotListViewModel viewModel) {
+            super(lifecycleOwner);
+            this.viewModel = viewModel;
+        }
+
+        @Override
+        protected LiveData<Shot[]> request(int nextId) {
+            return viewModel.getShots(nextId);
+        }
+
+        @Override
+        protected BaseViewHolder onCreateItemViewHolder(Context context, ViewGroup parent, int viewType) {
+            return new SelectedViewHolder(context, parent);
+        }
+
+        @Override
+        protected void onBindItemViewHolder(BaseViewHolder holder, int position) {
+            ((SelectedViewHolder)holder).setShots(getList().get(position));
+        }
     }
 }
