@@ -4,7 +4,7 @@
 ### 2017.6.5
 1. 增加TypeConverter:数据库不支持的类型转化为json字符串；
 2. 增加list adapter： BaseListRecyclerViewAdapter处理loading，error等viewholder； ListRecyclerViewAdapter处理list数据；
-3. 数据库缓存列表数据只缓存前3页；
+3. 数据库缓存列表数据只缓存前3页， 通过对比数据确定是否更新数据库；
 
 #### 2017.6.2
 1. 引入Retrofit封装module： service
