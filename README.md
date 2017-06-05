@@ -1,7 +1,13 @@
 # Drible
 - A Dribbble App by Android Architecture
 
-### 2017.6.5
+### 2016.6.5
+1. 增加数据中间层对象： Resource<T>, 用于判断数据结果状态：Success，Loading， Error；
+2. 分页请求bug：当结果成功或失败的时候，一定要removeObserver()， 防止数据库变化导致数据重复更新；
+3. 数据库逻辑：针对分页的数据，增加字段page（表示页面id），删除和查询都通过where page = pageId;
+
+
+### 2017.6.4
 1. 增加TypeConverter:数据库不支持的类型转化为json字符串；
 2. 增加list adapter： BaseListRecyclerViewAdapter处理loading，error等viewholder； ListRecyclerViewAdapter处理list数据；
 3. 数据库缓存列表数据只缓存前3页， 通过对比数据确定是否更新数据库；
