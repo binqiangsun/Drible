@@ -18,13 +18,13 @@ public interface ShotDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(Shot[] shots);
 
-    @Query("select * from shots order by shots.ind asc")
-    LiveData<Shot[]> loadShots();
+    @Query("select * from shots where page = :pageId order by shots.ind asc")
+    LiveData<Shot[]> loadShots(int pageId);
 
-    @Query("select * from shots order by shots.ind asc")
-    Shot[] loadShotSync();
+    @Query("select * from shots where page = :pageId order by shots.ind asc")
+    Shot[] loadShotSync(int pageId);
 
-    @Query("delete from shots")
-    void deleteShots();
+    @Query("delete from shots where page = :pageId")
+    void deleteShots(int pageId);
 
 }

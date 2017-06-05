@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.lukou.service.http.Resource;
 import com.lukou.service.list.adapter.BaseListRecyclerViewAdapter;
 import com.lukou.service.list.adapter.ListRecyclerViewAdapter;
 import com.lukou.service.list.viewholder.BaseViewHolder;
@@ -64,7 +65,7 @@ public class SelectedShotFragment extends LifecycleFragment {
         }
 
         @Override
-        protected LiveData<Shot[]> request(int nextId) {
+        protected LiveData<Resource<Shot[]>> request(int nextId) {
             return viewModel.getShots(nextId);
         }
 

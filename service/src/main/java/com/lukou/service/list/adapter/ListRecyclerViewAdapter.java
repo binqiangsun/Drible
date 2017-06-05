@@ -6,6 +6,8 @@ import android.arch.lifecycle.Observer;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 
+import com.lukou.service.http.Resource;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -34,11 +36,18 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
     }
 
     private void loadNext(int nextIndex) {
-        LiveData<T[]> resultData = request(nextIndex);
-        resultData.observe(lifecycleOwner, new Observer<T[]>() {
+        final LiveData<Resource<T[]>> resultData = request(nextIndex);
+        resultData.observe(lifecycleOwner, new Observer<Resource<T[]>>() {
             @Override
-            public void onChanged(@Nullable T[] resultList) {
-                requestSuccess(resultList);
+            public void onChanged(@Nullable Resource<T[]> result) {
+                if (result.status == Resource.SUCCESS) {
+                    //非常重要： 否则，分页数据旧的页面会不断更新数据
+                    resultData.removeObserver(this);
+                    requestSuccess(result.data);
+                } else if (result.status == Resource.ERROR) {
+                    resultData.removeObserver(this);
+                    requestFailed(result.message);
+                }
             }
         });
     }
@@ -49,10 +58,16 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
      * @param nextId
      * @return
      */
-    protected abstract LiveData<T[]> request(int nextId);
+    protected abstract LiveData<Resource<T[]>> request(int nextId);
 
     private void requestSuccess(T[] list){
         setResultList(list);
+        onRequestFinished();
+    }
+
+    private void requestFailed(String errorMsg) {
+        errorMsg = errorMsg;
+        isError = true;
         onRequestFinished();
     }
 

@@ -1,16 +1,18 @@
 package com.sunbinqiang.drible.repository;
 
-import android.arch.core.util.Function;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.lifecycle.Transformations;
+import android.arch.lifecycle.Observer;
+import android.os.Handler;
+import android.os.Message;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.lukou.service.http.Resource;
 import com.sunbinqiang.drible.db.DatabaseCreator;
 import com.sunbinqiang.drible.db.dao.ShotDao;
 import com.sunbinqiang.drible.db.entity.Shot;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,15 +28,30 @@ import retrofit2.Response;
 public class ShotListRepository {
 
     private static final int MAX_CACHE_PAGE = 3; //前3页内容缓存数据库
+    private static final int MSG_DATABASE = 1001;
 
-    private static final MutableLiveData ABSENT = new MutableLiveData();
+    private static final MutableLiveData LOADING_DATA = new MutableLiveData();
     {
         //noinspection unchecked
-        ABSENT.setValue(null);
+        LOADING_DATA.setValue(Resource.loading(null));
     }
 
     private ShotDao shotDao;
     private ExecutorService executor;
+    private Handler mHandler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+            if (msg.what == MSG_DATABASE) {
+                if (shotDao == null) {
+                    //数据库创建超时，从网络获取数据
+                    getShotsFromNet(msg.arg1, (MutableLiveData<Resource<Shot[]>>)msg.obj);
+                } else {
+                    getShotsFromDb(msg.arg1, (MutableLiveData<Resource<Shot[]>>)msg.obj);
+                }
+            }
+            return false;
+        }
+    });
 
     private static ShotListRepository instance;
 
@@ -51,6 +68,15 @@ public class ShotListRepository {
 
     private ShotListRepository() {
         this.executor = Executors.newSingleThreadExecutor();
+        DatabaseCreator.getInstance().isDatabaseCreated()
+                .observeForever(new Observer<Boolean>() {
+                    @Override
+                    public void onChanged(@Nullable Boolean isCreated) {
+                        if (isCreated && DatabaseCreator.getInstance().getDatabase() != null) {
+                            shotDao = DatabaseCreator.getInstance().getDatabase().shotDao();
+                        }
+                    }
+                });
     }
 
     /**
@@ -58,75 +84,77 @@ public class ShotListRepository {
      * @param page
      * @return
      */
-    public LiveData<Shot[]> getSelectedShots(final int page){
+    public LiveData<Resource<Shot[]>> getSelectedShots(final int page){
+        MutableLiveData<Resource<Shot[]>> shotsLiveData = new MutableLiveData<>();
         if (page < MAX_CACHE_PAGE) {
-            return getShotsFromDb(page);
+            getShotsFromDb(page, shotsLiveData);
         } else {
-            return getShotsFromNet(page);
+            getShotsFromNet(page, shotsLiveData);
         }
+        return shotsLiveData;
     }
 
-    private LiveData<Shot[]> getShotsFromNet(int page){
-        final MutableLiveData<Shot[]> data = new MutableLiveData<>();
+    private MutableLiveData<Resource<Shot[]>> getShotsFromNet(int page, final MutableLiveData<Resource<Shot[]>> shotsLiveData){
         RepositoryUtils.getApiService().getShots(page).enqueue(new Callback<Shot[]>() {
             @Override
             public void onResponse(Call<Shot[]> call, Response<Shot[]> response) {
                 // error case is left out for brevity
-                data.setValue(response.body());
+                shotsLiveData.setValue(Resource.success(response.body()));
             }
 
             @Override
             public void onFailure(Call<Shot[]> call, Throwable t) {
-
+                shotsLiveData.setValue(Resource.error(t.getMessage(), (Shot[])null));
             }
         });
-        return data;
+        return shotsLiveData;
     }
 
-    private LiveData<Shot[]> getShotsFromDb(final int page) {
-        LiveData<Boolean> databaseCreated = DatabaseCreator.getInstance().isDatabaseCreated();
-        final LiveData<Shot[]> data = Transformations.switchMap(databaseCreated,
-                new Function<Boolean, LiveData<Shot[]>>() {
-                    @Override
-                    public LiveData<Shot[]> apply(Boolean isDbCreated) {
-                        if (!Boolean.TRUE.equals(isDbCreated)) { // Not needed here, but watch out for null
-                            Log.d("shotRepository", "1, database is not created ");
-                            return ABSENT;
-                        } else {
-                            refreshShots(page);
-                            if (DatabaseCreator.getInstance().getDatabase() == null ||
-                                    DatabaseCreator.getInstance().getDatabase().shotDao() == null) {
-                                return ABSENT;
-                            }
-                            shotDao = DatabaseCreator.getInstance().getDatabase().shotDao();
-                            return shotDao.loadShots();
-                        }
+    private LiveData<Resource<Shot[]>> getShotsFromDb(final int page, final MutableLiveData<Resource<Shot[]>> shotsLiveData) {
+        shotsLiveData.setValue(Resource.loading((Shot[])null));
+        if (shotDao == null) {
+            Message msg = Message.obtain();
+            msg.what = MSG_DATABASE;
+            msg.arg1 = page;
+            msg.obj = shotsLiveData;
+            mHandler.sendMessageDelayed(msg, 3000);
+        } else {
+            refreshShots(page);
+            shotDao.loadShots(page).observeForever(new Observer<Shot[]>() {
+                @Override
+                public void onChanged(@Nullable Shot[] shots) {
+                    if (shots != null && shots.length > 0) {
+                        shotsLiveData.setValue(Resource.success(shots));
                     }
-                });
-        return data;
+                }
+            });
+        }
+        return shotsLiveData;
     }
 
     private void refreshShots(final int page){
-        executor.execute(new Runnable() {
+        RepositoryUtils.getApiService().getShots(page).enqueue(new Callback<Shot[]>() {
             @Override
-            public void run() {
-                try {
-                    Response<Shot[]> response = RepositoryUtils.getApiService().getShots(page).execute();
-                    if (response == null || response.body() == null) {
-                        return;
-                    }
-                    Shot[] shots = response.body();
-                    if (page < MAX_CACHE_PAGE) {
-                        compareAndInsertDb(shotDao.loadShotSync(), shots);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+            public void onResponse(Call<Shot[]> call, Response<Shot[]> response) {
+                final Shot[] shots = response.body();
+                if (page < MAX_CACHE_PAGE) {
+                    executor.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            compareAndInsertDb(shotDao.loadShotSync(page), shots, page);
+                        }
+                    });
                 }
+            }
+
+            @Override
+            public void onFailure(Call<Shot[]> call, Throwable t) {
+                Log.d("shotRepo", "refresh net error");
             }
         });
     }
 
-    private void compareAndInsertDb(Shot[] dbShots, Shot[] netShots){
+    private void compareAndInsertDb(Shot[] dbShots, Shot[] netShots, int page){
         if (netShots == null) {
             Log.d("shotReposi", "net is null");
             return;
@@ -138,20 +166,22 @@ public class ShotListRepository {
 
         if (!Arrays.equals(dbShots, netShots)) {
             // not equal
-            insertDbShots(netShots);
+            insertDbShots(netShots, page);
             Log.d("shotReposi", "db is not equal to net");
         } else {
             Log.d("shotReposi", "db is equal to net");
         }
     }
 
-    private void insertDbShots(Shot[] netShots){
+    private void insertDbShots(Shot[] netShots, int page){
         //数据库中记录初始顺序
         int index = 0;
         for (Shot shot : netShots) {
+            shot.setPage(page);
             shot.setInd(index ++);
         }
-        shotDao.deleteShots();
+        // 仅仅删除当页的数据
+        shotDao.deleteShots(page);
         shotDao.insertAll(netShots);
     }
 

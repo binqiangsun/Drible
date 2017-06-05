@@ -3,6 +3,7 @@ package com.sunbinqiang.drible.viewmodel;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModel;
 
+import com.lukou.service.http.Resource;
 import com.sunbinqiang.drible.db.entity.Shot;
 import com.sunbinqiang.drible.repository.ShotListRepository;
 
@@ -18,7 +19,7 @@ public class ShotListViewModel extends ViewModel {
         this.shotRepository = ShotListRepository.getInstance();
     }
 
-    public LiveData<Shot[]> getShots(int page) {
+    public LiveData<Resource<Shot[]>> getShots(int page) {
         return shotRepository.getSelectedShots(page);
     }
 

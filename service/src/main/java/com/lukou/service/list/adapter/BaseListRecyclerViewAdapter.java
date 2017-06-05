@@ -38,7 +38,7 @@ public abstract class BaseListRecyclerViewAdapter extends RecyclerView.Adapter<B
 
     protected String errorMsg;
     protected boolean isEnd;
-    protected int nextPage = 0;
+    protected int nextPage = 1;
     protected boolean isError;
 
     public abstract int getListCount();
