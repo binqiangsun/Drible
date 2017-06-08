@@ -23,11 +23,12 @@ import retrofit2.Response;
 
 /**
  * Created by sunbinqiang on 28/05/2017.
+ * 分页列表中的数据没有办法实时更新
  */
 
 public class ShotListRepository {
 
-    private static final int MAX_CACHE_PAGE = 3; //前3页内容缓存数据库
+    private static final int MAX_CACHE_PAGE = 10; //前10页内容缓存数据库
     private static final int MSG_DATABASE = 1001;
 
     private static final MutableLiveData LOADING_DATA = new MutableLiveData();
@@ -80,7 +81,7 @@ public class ShotListRepository {
     }
 
     /**
-     *
+     * 获取首页列表数据
      * @param page
      * @return
      */
@@ -95,11 +96,17 @@ public class ShotListRepository {
     }
 
     private MutableLiveData<Resource<Shot[]>> getShotsFromNet(int page, final MutableLiveData<Resource<Shot[]>> shotsLiveData){
+        Log.d("shotRepo", "get shots from net");
         RepositoryUtils.getApiService().getShots(page).enqueue(new Callback<Shot[]>() {
             @Override
             public void onResponse(Call<Shot[]> call, Response<Shot[]> response) {
                 // error case is left out for brevity
-                shotsLiveData.setValue(Resource.success(response.body()));
+                Shot[] shots = response.body();
+                if (response.isSuccessful() && shots != null) {
+                    shotsLiveData.setValue(Resource.success(response.body()));
+                } else {
+                    shotsLiveData.setValue(Resource.error("data is null", (Shot[])null));
+                }
             }
 
             @Override
@@ -111,8 +118,11 @@ public class ShotListRepository {
     }
 
     private LiveData<Resource<Shot[]>> getShotsFromDb(final int page, final MutableLiveData<Resource<Shot[]>> shotsLiveData) {
+        Log.d("shotRepo", "get shots from db");
         shotsLiveData.setValue(Resource.loading((Shot[])null));
+
         if (shotDao == null) {
+            Log.d("shotRepo", "db is null");
             Message msg = Message.obtain();
             msg.what = MSG_DATABASE;
             msg.arg1 = page;
@@ -120,11 +130,16 @@ public class ShotListRepository {
             mHandler.sendMessageDelayed(msg, 3000);
         } else {
             refreshShots(page);
-            shotDao.loadShots(page).observeForever(new Observer<Shot[]>() {
+            final LiveData<Shot[]> dbLiveData = shotDao.loadShots(page);
+            dbLiveData.observeForever(new Observer<Shot[]>() {
                 @Override
                 public void onChanged(@Nullable Shot[] shots) {
                     if (shots != null && shots.length > 0) {
+                        Log.d("shotRepo", "db shots changed not null");
+                        dbLiveData.removeObserver(this);
                         shotsLiveData.setValue(Resource.success(shots));
+                    } else {
+                        Log.d("shotRepo", "db shots changed null");
                     }
                 }
             });
@@ -133,9 +148,11 @@ public class ShotListRepository {
     }
 
     private void refreshShots(final int page){
+        Log.d("shotRepo", "refresh shots");
         RepositoryUtils.getApiService().getShots(page).enqueue(new Callback<Shot[]>() {
             @Override
             public void onResponse(Call<Shot[]> call, Response<Shot[]> response) {
+                Log.d("shotRepo", "refresh shots success");
                 final Shot[] shots = response.body();
                 if (page < MAX_CACHE_PAGE) {
                     executor.execute(new Runnable() {

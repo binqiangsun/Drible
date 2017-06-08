@@ -35,9 +35,9 @@ public class HttpClient {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         return builder
                 .addInterceptor(headerInterceptor)
-                .addNetworkInterceptor(cacheInterceptor)   //addInterceptor 缓存不生效
-                .addInterceptor(cacheInterceptor)
-                .cache(getHttpCache())
+//                .addNetworkInterceptor(cacheInterceptor)   //addInterceptor 缓存不生效
+//                .addInterceptor(cacheInterceptor)
+//                .cache(getHttpCache())
                 .build();
     }
 
