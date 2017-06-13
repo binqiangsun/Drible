@@ -13,7 +13,9 @@ import android.net.Uri;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 
+import com.bumptech.glide.DrawableRequestBuilder;
 import com.bumptech.glide.DrawableTypeRequest;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
@@ -63,17 +65,22 @@ public class NetworkImageView extends android.support.v7.widget.AppCompatImageVi
      * @param height
      */
     public void setImageUrl(String imageUrl, int width, int height){
-        setImageUrlWithPriority(imageUrl, Priority.NORMAL, width, height);
+        setImageUrl(imageUrl, Priority.NORMAL, width, height);
+    }
+
+    public void setImageUrl(String imageUrl, Priority priority, int width, int height){
+        setImageUrl(imageUrl, "", priority, width, height);
     }
 
     /**
      * 优先级参数： 可以自定义高的优先级
      * @param imageUrl
+     * @param thumbUrl  缩略图
      * @param priority
      * @param width
      * @param height
      */
-    public void setImageUrlWithPriority(String imageUrl, Priority priority, int width, int height){
+    public void setImageUrl(String imageUrl, String thumbUrl, Priority priority, int width, int height){
         Activity activity = DribleUtils.getActivityFromContext(getContext());
         if(TextUtils.isEmpty(imageUrl) || activity == null){
             return;
@@ -82,8 +89,13 @@ public class NetworkImageView extends android.support.v7.widget.AppCompatImageVi
             return;
         }
         DrawableTypeRequest glideRequest = Glide
-                .with(getContext())
+                .with(activity)
                 .load(imageUrl);
+        if (!TextUtils.isEmpty(thumbUrl)) {
+            Log.d("networkimageview", "thumn:"+thumbUrl);
+            DrawableRequestBuilder<String> requestBuilder = Glide.with(activity).load(thumbUrl);
+            glideRequest.thumbnail(requestBuilder);
+        }
         if (width > 0 && height > 0) {
             glideRequest.override(width, height);
         }
@@ -95,9 +107,10 @@ public class NetworkImageView extends android.support.v7.widget.AppCompatImageVi
         }else if(isCircle){
             glideRequest.transform(new GlideInstance.CircleTransform(getContext()));
         }
-        glideRequest.diskCacheStrategy(DiskCacheStrategy.RESULT);
+        glideRequest.diskCacheStrategy(DiskCacheStrategy.SOURCE);
         glideRequest.into(this);
     }
+
 
     /**
      * 设置圆角

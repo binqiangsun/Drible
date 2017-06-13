@@ -42,10 +42,8 @@
                     android:id="@+id/backdrop"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
                     android:fitsSystemWindows="true"
                     app:layout_collapseMode="parallax"
-                    app:imageUrl="@{shot.hdipImage}"
                     />
 
                 <android.support.v7.widget.Toolbar

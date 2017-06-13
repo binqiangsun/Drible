@@ -10,6 +10,16 @@
 
     <style name="Platform.Theme.Drible" parent="Theme.AppCompat.Light.NoActionBar" />
 
+    <style name="Widget.Toolbar" parent="Widget.AppCompat.Toolbar">
+        <item name="android:layout_gravity">top</item>
+        <item name="android:background">@color/colorPrimary</item>
+        <item name="android:layout_height">@dimen/actionBarSize</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+        <item name="theme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
+        <item name="titleTextColor">@color/white</item>
+        <item name="contentInsetStartWithNavigation">0dp</item>
+    </style>
 
 
 </resources>

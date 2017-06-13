@@ -1,25 +1,19 @@
 package com.sunbinqiang.drible.ui;
 
 import android.arch.lifecycle.LifecycleFragment;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.GridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.lukou.service.http.Resource;
 import com.lukou.service.list.adapter.BaseListRecyclerViewAdapter;
-import com.lukou.service.list.adapter.ListRecyclerViewAdapter;
-import com.lukou.service.list.viewholder.BaseViewHolder;
 import com.sunbinqiang.drible.R;
 import com.sunbinqiang.drible.databinding.ListFragmentBinding;
-import com.sunbinqiang.drible.db.entity.Shot;
 import com.sunbinqiang.drible.viewmodel.ShotListViewModel;
 
 /**
@@ -34,49 +28,27 @@ public class SelectedShotFragment extends LifecycleFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        viewModel = ViewModelProviders.of(this).get(ShotListViewModel.class);
 
-        initView(viewModel);
     }
 
     private void initView(ShotListViewModel viewModel) {
-        ShotAdapter shotAdapter = new ShotAdapter(this, viewModel);
+        Log.d("shotFragment", "init view");
         GridLayoutManager manager = new GridLayoutManager(getContext(), 2);
-        manager.setSpanSizeLookup(BaseListRecyclerViewAdapter.getSpanSizeLookup(shotAdapter));
+        manager.setSpanSizeLookup(BaseListRecyclerViewAdapter.getSpanSizeLookup(viewModel.getShotAdapter(this)));
         binding.recyclerView.setLayoutManager(manager);
-        binding.recyclerView.setAdapter(shotAdapter);
+        binding.recyclerView.setAdapter(viewModel.getShotAdapter(this));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.list_fragment, container, false);
+        viewModel = ViewModelProviders.of(this).get(ShotListViewModel.class);
+
+        initView(viewModel);
         return binding.getRoot();
     }
 
 
-    private static class ShotAdapter extends ListRecyclerViewAdapter<Shot> {
 
-        private ShotListViewModel viewModel;
-
-        public ShotAdapter(LifecycleOwner lifecycleOwner, ShotListViewModel viewModel) {
-            super(lifecycleOwner);
-            this.viewModel = viewModel;
-        }
-
-        @Override
-        protected LiveData<Resource<Shot[]>> request(int nextId) {
-            return viewModel.getShots(nextId);
-        }
-
-        @Override
-        protected BaseViewHolder onCreateItemViewHolder(Context context, ViewGroup parent, int viewType) {
-            return new SelectedViewHolder(context, parent);
-        }
-
-        @Override
-        protected void onBindItemViewHolder(BaseViewHolder holder, int position) {
-            ((SelectedViewHolder)holder).setShots(getList().get(position));
-        }
-    }
 }

@@ -1,7 +1,7 @@
 package com.lukou.service.list.adapter;
 
 import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
@@ -20,9 +20,21 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
     private final ArrayList<T> list = new ArrayList<>();
     private String errorMsg;
     private LifecycleOwner lifecycleOwner;
+    private MutableLiveData<Resource<T[]>> liveDataList;
 
     public ListRecyclerViewAdapter(LifecycleOwner lifecycleOwner){
         this.lifecycleOwner = lifecycleOwner;
+        liveDataList = new MutableLiveData<>();
+        liveDataList.observe(lifecycleOwner, new Observer<Resource<T[]>>() {
+            @Override
+            public void onChanged(@Nullable Resource<T[]> result) {
+                if (result.status == Resource.SUCCESS) {
+                    requestSuccess(result.data);
+                } else if (result.status == Resource.ERROR) {
+                    requestFailed(result.message);
+                }
+            }
+        });
     }
 
     @Override
@@ -36,20 +48,7 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
     }
 
     private void loadNext(int nextIndex) {
-        final LiveData<Resource<T[]>> resultData = request(nextIndex);
-        resultData.observe(lifecycleOwner, new Observer<Resource<T[]>>() {
-            @Override
-            public void onChanged(@Nullable Resource<T[]> result) {
-                if (result.status == Resource.SUCCESS) {
-                    //非常重要： 否则，分页数据旧的页面会不断更新数据
-                    resultData.removeObserver(this);
-                    requestSuccess(result.data);
-                } else if (result.status == Resource.ERROR) {
-                    resultData.removeObserver(this);
-                    requestFailed(result.message);
-                }
-            }
-        });
+        request(nextIndex, liveDataList);
     }
 
     /**
@@ -58,7 +57,7 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
      * @param nextId
      * @return
      */
-    protected abstract LiveData<Resource<T[]>> request(int nextId);
+    protected abstract void request(int nextId, MutableLiveData<Resource<T[]>> liveDataList);
 
     private void requestSuccess(T[] list){
         setResultList(list);

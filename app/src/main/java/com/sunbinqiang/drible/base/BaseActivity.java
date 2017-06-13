@@ -52,4 +52,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected void showToast(String msg){
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
+
+    protected void setTitle(String title) {
+        toolbar.setTitle(title);
+    }
 }

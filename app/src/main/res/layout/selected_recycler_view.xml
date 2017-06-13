@@ -75,9 +75,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/icon_like"
+                    android:drawablePadding="2dp"
                     android:text="@{String.valueOf(shot.likes_count)}"
                     android:gravity="center"
-                    android:textColor="#aaaaaa"
+                    android:textColor="#515151"
                     android:padding="6dp"
                     android:textSize="12sp"/>
 
@@ -85,9 +86,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/icon_view"
+                    android:drawablePadding="2dp"
                     android:text="@{String.valueOf(shot.views_count)}"
                     android:gravity="center"
-                    android:textColor="#aaaaaa"
+                    android:textColor="#515151"
                     android:padding="6dp"
                     android:textSize="12sp"/>
 

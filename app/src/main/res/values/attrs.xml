@@ -2,6 +2,7 @@
 <resources>
     <declare-styleable name="NetworkImageView">
         <attr name="imageUrl" format="string" />
+        <attr name="thumbUrl" format="string" />
         <attr name="enableCircle" format="boolean" />
         <attr name="roundRadius" format="integer" />
         <attr name="aspectRatio" format="float" />
