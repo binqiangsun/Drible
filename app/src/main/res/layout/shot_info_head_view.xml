@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    >
+
+    <data>
+        <variable
+            name="shot"
+            type="com.sunbinqiang.drible.db.entity.Shot"/>
+
+        <variable
+            name="clickHandlers"
+            type="android.view.View.OnClickListener"/>
+
+    </data>
+
+    <LinearLayout android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="@dimen/card_margin_medium">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:paddingTop="8dp">
+
+
+                <com.sunbinqiang.drible.widget.NetworkImageView
+                    android:id="@+id/author_drawee_view"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:onClick="@{clickHandlers}"
+                    app:imageUrl="@{shot.user.avatar_url}"
+                    app:enableCircle="true"
+                    />
+
+                <TextView
+                    android:id="@+id/shot_title_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_main"
+                    android:text="@{shot.title}"
+                    android:textSize="@dimen/text_large"
+                    android:layout_toRightOf="@id/author_drawee_view"
+                    android:layout_marginLeft="@dimen/card_margin_medium"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/card_margin_medium"
+                    android:textColor="@color/text_main"
+                    android:textSize="@dimen/text_medium_14"
+                    android:layout_toRightOf="@id/author_drawee_view"
+                    android:layout_below="@id/shot_title_tv"
+                    android:layout_marginTop="@dimen/card_margin_tiny"
+                    android:maxLines="1"
+                    android:text="@{shot.user.name}"/>
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="@dimen/card_margin_medium_12"
+                android:layout_marginLeft="64dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/icon_view"
+                    android:text="@{String.valueOf(shot.views_count)}"
+                    android:drawablePadding="@dimen/card_margin_tiny"
+                    android:gravity="center"
+                    android:textColor="@color/description"
+                    android:padding="6dp"
+                    android:textSize="@dimen/text_medium"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/icon_like"
+                    android:text="@{String.valueOf(shot.likes_count)}"
+                    android:drawablePadding="@dimen/card_margin_tiny"
+                    android:gravity="center"
+                    android:textColor="@color/description"
+                    android:padding="6dp"
+                    android:textSize="@dimen/text_medium"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/icon_comment"
+                    android:text="@{String.valueOf(shot.comments_count)}"
+                    android:drawablePadding="@dimen/card_margin_tiny"
+                    android:gravity="center"
+                    android:textColor="@color/description"
+                    android:padding="6dp"
+                    android:textSize="@dimen/text_medium"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/shot_text_tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:textSize="@dimen/text_medium_14"
+                android:textColor="@color/description"
+                />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="@color/divider"/>
+
+    </LinearLayout>
+
+</layout>

@@ -1,11 +1,13 @@
 package com.sunbinqiang.drible.http;
 
+import com.sunbinqiang.drible.bean.Comment;
 import com.sunbinqiang.drible.db.entity.Shot;
 
 import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
 import rx.Observable;
@@ -24,6 +26,10 @@ public interface ApiService {
 
     @GET("shots")
     Call<Shot[]> getShots(@Query("page") int page);
+
+    @GET("shots/{id}/comments")
+    Call<Comment[]> getComments(@Path("id") int id,
+                                @Query("page") int page);
 
 
 }

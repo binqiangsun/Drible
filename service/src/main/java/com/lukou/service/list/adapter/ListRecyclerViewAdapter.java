@@ -15,16 +15,18 @@ import java.util.Arrays;
  * @author Sunbinqiang
  * 处理分页数据
  */
-public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAdapter {
+public abstract class ListRecyclerViewAdapter<T, M> extends BaseListRecyclerViewAdapter {
 
     private final ArrayList<T> list = new ArrayList<>();
     private String errorMsg;
     private LifecycleOwner lifecycleOwner;
     private MutableLiveData<Resource<T[]>> liveDataList;
+    protected M viewModel;
 
-    public ListRecyclerViewAdapter(LifecycleOwner lifecycleOwner){
+    public ListRecyclerViewAdapter(LifecycleOwner lifecycleOwner, MutableLiveData<Resource<T[]>> liveData, M viewModel){
         this.lifecycleOwner = lifecycleOwner;
-        liveDataList = new MutableLiveData<>();
+        this.viewModel = viewModel;
+        liveDataList = liveData;
         liveDataList.observe(lifecycleOwner, new Observer<Resource<T[]>>() {
             @Override
             public void onChanged(@Nullable Resource<T[]> result) {
@@ -48,7 +50,7 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
     }
 
     private void loadNext(int nextIndex) {
-        request(nextIndex, liveDataList);
+        request(nextIndex);
     }
 
     /**
@@ -57,7 +59,7 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
      * @param nextId
      * @return
      */
-    protected abstract void request(int nextId, MutableLiveData<Resource<T[]>> liveDataList);
+    protected abstract void request(int nextId);
 
     private void requestSuccess(T[] list){
         setResultList(list);

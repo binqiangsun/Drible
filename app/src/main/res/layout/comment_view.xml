@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <variable
+            name="comment"
+            type="com.sunbinqiang.drible.bean.Comment"/>
+
+        <variable
+            name="clickHandlers"
+            type="android.view.View.OnClickListener"/>
+
+        <import type="android.text.Html"/>
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/card_margin_small"
+        android:layout_marginLeft="@dimen/card_margin_medium"
+        android:orientation="horizontal">
+
+        <com.sunbinqiang.drible.widget.NetworkImageView
+            android:id="@+id/author_drawee_view"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            app:imageUrl="@{comment.user.avatar_url}"
+            app:enableCircle="true"
+            android:layout_gravity="top"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="@dimen/card_margin_medium">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:textColor="@color/text_main"
+                android:textSize="@dimen/text_medium_1"
+                android:maxLines="1"
+                android:text="@{comment.user.username}"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/card_margin_small"
+                android:layout_marginRight="@dimen/card_margin_medium"
+                android:textColor="@color/description"
+                android:textSize="@dimen/text_small"
+                android:maxLines="2"
+                android:text="@{Html.fromHtml(comment.body)}"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/divider"
+                android:layout_marginRight="@dimen/card_margin_medium"/>
+
+        </LinearLayout>
+
+
+    </LinearLayout>
+
+</layout>

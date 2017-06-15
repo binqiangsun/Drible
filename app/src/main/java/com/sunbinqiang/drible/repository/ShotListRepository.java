@@ -24,16 +24,6 @@ import retrofit2.Response;
 
 public class ShotListRepository {
 
-    private static final int MAX_CACHE_PAGE = 10; //前10页内容缓存数据库
-    private static final int MSG_DATABASE = 1001;
-    MutableLiveData<Resource<Shot[]>> shotsLiveData = new MutableLiveData<>(); //viewmodel会重用该对象
-
-    private static final MutableLiveData LOADING_DATA = new MutableLiveData();
-    {
-        //noinspection unchecked
-        LOADING_DATA.setValue(Resource.loading(null));
-    }
-
     private ShotDao shotDao;
     private ExecutorService executor;
 
@@ -72,7 +62,7 @@ public class ShotListRepository {
         getShotsFromNet(page, liveData);
     }
 
-    private MutableLiveData<Resource<Shot[]>> getShotsFromNet(int page, final MutableLiveData<Resource<Shot[]>> shotsLiveData){
+    private void getShotsFromNet(int page, final MutableLiveData<Resource<Shot[]>> shotsLiveData){
         Log.d("shotRepo", "get shots from net");
         RepositoryUtils.getApiService().getShots(page).enqueue(new Callback<Shot[]>() {
             @Override
@@ -91,23 +81,20 @@ public class ShotListRepository {
                 shotsLiveData.setValue(Resource.error(t.getMessage(), (Shot[])null));
             }
         });
-        return shotsLiveData;
     }
 
     private void insertDbShots(Shot[] netShots){
-        // 仅仅删除当页的数据
         shotDao.insertAll(netShots);
     }
 
     private void addLiveData(MutableLiveData<Resource<Shot[]>> liveData, final Shot[] addList) {
         liveData.setValue(Resource.success(addList));
-        new Thread(new Runnable() {
+        RepositoryUtils.repository_executor.execute(new Runnable() {
             @Override
             public void run() {
                 insertDbShots(addList);
             }
-        }).start();
-
+        });
     }
 
 

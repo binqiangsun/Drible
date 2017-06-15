@@ -1,4 +1,4 @@
-package com.sunbinqiang.drible.ui;
+package com.sunbinqiang.drible.ui.selected;
 
 import android.arch.lifecycle.LifecycleFragment;
 import android.arch.lifecycle.ViewModelProviders;
@@ -22,7 +22,6 @@ import com.sunbinqiang.drible.viewmodel.ShotListViewModel;
 
 public class SelectedShotFragment extends LifecycleFragment {
 
-    private ShotListViewModel viewModel;
     private ListFragmentBinding binding;
 
     @Override
@@ -33,17 +32,18 @@ public class SelectedShotFragment extends LifecycleFragment {
 
     private void initView(ShotListViewModel viewModel) {
         Log.d("shotFragment", "init view");
+        ShotListAdapter shotListAdapter = new ShotListAdapter(this, viewModel.getLiveData(), viewModel);
         GridLayoutManager manager = new GridLayoutManager(getContext(), 2);
-        manager.setSpanSizeLookup(BaseListRecyclerViewAdapter.getSpanSizeLookup(viewModel.getShotAdapter(this)));
+        manager.setSpanSizeLookup(BaseListRecyclerViewAdapter.getSpanSizeLookup(shotListAdapter));
         binding.recyclerView.setLayoutManager(manager);
-        binding.recyclerView.setAdapter(viewModel.getShotAdapter(this));
+        binding.recyclerView.setAdapter(shotListAdapter);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.list_fragment, container, false);
-        viewModel = ViewModelProviders.of(this).get(ShotListViewModel.class);
+        ShotListViewModel viewModel = ViewModelProviders.of(this).get(ShotListViewModel.class);
 
         initView(viewModel);
         return binding.getRoot();
