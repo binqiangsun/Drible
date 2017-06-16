@@ -30,6 +30,7 @@ public abstract class BaseActivity extends AppCompatActivity implements Lifecycl
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         if(toolbar != null) {
             setSupportActionBar(toolbar);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
         initViews();
         setViewListener();
