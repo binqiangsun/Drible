@@ -1,7 +1,14 @@
 # Drible
 - A Dribbble App by Android Architecture
 
-![app architecture](http://img1.lukou.com/static/p/blog/medium/0013/40/98/36/13409836.jpg)
+### 预览
+
+![](http://img2.lukou.com/static/p/blog/medium/0013/41/00/74/13410074.jpg@400w.jpg)
+![](http://img2.lukou.com/static/p/blog/medium/0013/41/00/78/13410078.jpg@400w.jpg)
+
+
+### 架构
+![app architecture](http://img2.lukou.com/static/p/blog/medium/0013/40/98/36/13409836.jpg@400w.jpg)
 
 
 ------------------edit log----------------------
