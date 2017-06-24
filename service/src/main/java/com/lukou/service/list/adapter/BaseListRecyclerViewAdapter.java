@@ -3,6 +3,7 @@ package com.lukou.service.list.adapter;
 import android.content.Context;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -76,6 +77,9 @@ public abstract class BaseListRecyclerViewAdapter extends RecyclerView.Adapter<B
         if (isError() || (!isEnd())) {
             count++;
         }
+        Log.d("listRecycler-isend", String.valueOf(isEnd()));
+        Log.d("listRecycler-headcount", String.valueOf(getHeaderViewCount()));
+        Log.d("listRecycler", String.valueOf(count));
         return getListCount() + count;
     }
 

@@ -87,13 +87,17 @@ public abstract class ListRecyclerViewAdapter<T, M> extends BaseListRecyclerView
                     sortList(list, resultList);
                     notifyItemRangeChanged(0, getItemCount());
                 }
+            } else if (resultList.length == 0) {
+                //当前页数据为空的时候， 不再请求下一页。
+                isEnd = true;
+                notifyItemChanged(getItemCount());
+                return;
             } else {
                 //分页加载，直接加在后面即可
                 int insertPosition = getItemCount();
                 sortList(list, resultList);
                 notifyItemInserted(insertPosition);
             }
-            isEnd = resultList.length == 0;
             nextPage ++;
         }
     }
