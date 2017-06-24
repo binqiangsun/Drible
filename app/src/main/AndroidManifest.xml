@@ -16,7 +16,7 @@
         android:theme="@style/DribleTheme"
         android:name=".MainApplication"
         >
-        <activity android:name=".MainActivity"
+        <activity android:name=".ui.home.HomeActivity"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,6 +31,32 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.login.LoginWebActivity">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:host="login"
+                    android:scheme="drible" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.user.UserInfoActivity"
+            android:label="user">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data
+                    android:host="user"
+                    android:scheme="drible" />
+            </intent-filter>
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.home.HomeActivity" />
         </activity>
     </application>
 

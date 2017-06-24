@@ -7,6 +7,9 @@
     <color name="white">#ffffff</color>
     <color name="divider">#595C63</color>
 
+    <color name="tabIndicator">#C1AF8A</color>
+    <color name="tabText">#7F8085</color>
+
     <color name="text_main">#43240c</color>
     <color name="description">#444444</color>
 </resources>
