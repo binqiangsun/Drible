@@ -1,6 +1,17 @@
 # Drible
 - A Dribbble App by Android Architecture
 
+### 预览
+
+![](http://img2.lukou.com/static/p/blog/medium/0013/41/00/74/13410074.jpg@400w.jpg)
+![](http://img2.lukou.com/static/p/blog/medium/0013/41/00/78/13410078.jpg@400w.jpg)
+
+
+### 架构
+![app architecture](http://img2.lukou.com/static/p/blog/medium/0013/40/98/36/13409836.jpg@400w.jpg)
+
+
+------------------edit log----------------------
 ### 2016.6.5
 1. 增加数据中间层对象： Resource<T>, 用于判断数据结果状态：Success，Loading， Error；
 2. 分页请求bug：当结果成功或失败的时候，一定要removeObserver()， 防止数据库变化导致数据重复更新；
