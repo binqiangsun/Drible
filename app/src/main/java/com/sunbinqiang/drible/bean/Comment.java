@@ -3,6 +3,8 @@ package com.sunbinqiang.drible.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.lukou.service.account.bean.User;
+
 /**
  * Created by sunbinqiang on 6/18/16.
  */

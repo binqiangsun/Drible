@@ -2,24 +2,32 @@ package com.sunbinqiang.drible.ui.user;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.view.View;
 
+import com.lukou.service.account.bean.User;
 import com.sunbinqiang.drible.R;
 import com.sunbinqiang.drible.base.BaseActivity;
-import com.sunbinqiang.drible.bean.User;
+import com.sunbinqiang.drible.databinding.UserInfoLayoutBinding;
+import com.sunbinqiang.drible.widget.ViewPageAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * Created by sunbinqiang on 8/7/16.
  */
 
-public class UserInfoActivity extends BaseActivity {
-    private static final int MSG_VIEW_ID = 1;
-    private User mUser;
-    private int mUserId;
+public class UserInfoActivity extends BaseActivity implements UserConstract.View {
+    private UserInfoLayoutBinding mBinding;
+    private UserConstract.Presenter mPresenter;
 
     //其他人个人主页
-    public static void startUserInfoActivity(Context context, int userId){
+    public static void startUserInfoActivity(Context context, int userId) {
         Intent intent = new Intent(context, UserInfoActivity.class);
         intent.putExtra("other", true);
         intent.putExtra("userId", userId);
@@ -27,14 +35,14 @@ public class UserInfoActivity extends BaseActivity {
     }
 
     //自己的个人主页
-    public static void startProfileActivity(Context context){
+    public static void startProfileActivity(Context context) {
         Intent intent = new Intent(context, UserInfoActivity.class);
         context.startActivity(intent);
     }
 
     @Override
     protected void onBindView(View view) {
-
+        mBinding = DataBindingUtil.bind(view);
     }
 
     @Override
@@ -44,22 +52,19 @@ public class UserInfoActivity extends BaseActivity {
 
     @Override
     protected void initViews() {
-        boolean isOther = getIntent().getBooleanExtra("other", false);
-        if(isOther){
-            mUserId = getIntent().getIntExtra("userId", 0);
-//            getUserInfo();
-            return;
-        }
-        //个人主页
-//        if(!MainApplication.instance().accountService().isLogin()) {
-//            Uri uri = getIntent().getData();
-//            if(uri != null) {
-//                String code = uri.getQueryParameter("code");
-//                getUser(code);
-//            }
-//        }else{
-//            updateView(MainApplication.instance().accountService().user());
-//        }
+        new UserPresenter(this);
+        mPresenter.start(getIntent());
+    }
+
+    @Override
+    public void setPresenter(UserConstract.Presenter presenter) {
+        mPresenter = presenter;
+    }
+
+    @Override
+    public void showUser(User user) {
+        mBinding.setUser(user);
+        setTabViewPager(mBinding.userTabs, mBinding.userViewPager);
     }
 
 
@@ -123,36 +128,32 @@ public class UserInfoActivity extends BaseActivity {
 //                });
 //    }
 //
-//    private void updateView(User user){
-//        mUser = user;
-//        mBinding.setUser(mUser);
-//        setTabViewPager(mBinding.userTabs, mBinding.userViewPager);
-//    }
+
 //
-//    private void setTabViewPager(TabLayout tabLayout, ViewPager viewPager){
-//
-//        ViewPageAdapter viewPageAdapter = new ViewPageAdapter(getSupportFragmentManager());
-//
-//        List<Fragment> fragmentList = new ArrayList<>();
+    private void setTabViewPager(TabLayout tabLayout, ViewPager viewPager){
+
+        ViewPageAdapter viewPageAdapter = new ViewPageAdapter(getSupportFragmentManager());
+
+        List<Fragment> fragmentList = new ArrayList<>();
 //
 //        fragmentList.add(UserShotFragment.newInstance(TypeUtils.SHOT_SHOTS, mUser.getId()));
 //        fragmentList.add(UserShotFragment.newInstance(TypeUtils.SHOT_LIKES, mUser.getId()));
 //
 //        fragmentList.add(UserListFragment.newInstance(UserListFragment.TYPE_FOLLOWER, mUser.getId()));
 //        fragmentList.add(UserListFragment.newInstance(UserListFragment.TYPE_FOLLOWING, mUser.getId()));
-//        viewPageAdapter.setFragments(fragmentList);
-//
-//        List<String> titles = new ArrayList<>();
-//        titles.add("ALL");
-//        titles.add("LIKES");
-//        titles.add("FOLLOWERS");
-//        titles.add("FOLLOWINGS");
-//
-//        viewPageAdapter.setTitles(titles);
-//
-//        viewPager.setAdapter(viewPageAdapter);
-//        tabLayout.setupWithViewPager(viewPager);
-//        viewPager.setOffscreenPageLimit(fragmentList.size());
-//    }
+        viewPageAdapter.setFragments(fragmentList);
+
+        List<String> titles = new ArrayList<>();
+        titles.add("ALL");
+        titles.add("LIKES");
+        titles.add("FOLLOWERS");
+        titles.add("FOLLOWINGS");
+
+        viewPageAdapter.setTitles(titles);
+
+        viewPager.setAdapter(viewPageAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+        viewPager.setOffscreenPageLimit(fragmentList.size());
+    }
 
 }

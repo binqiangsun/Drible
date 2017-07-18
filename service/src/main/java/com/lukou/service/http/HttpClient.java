@@ -2,6 +2,7 @@ package com.lukou.service.http;
 
 
 import com.lukou.service.LibApplication;
+import com.lukou.service.utils.Environment;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,11 @@ public class HttpClient {
 
     private static OkHttpClient reBuild() {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        if (Environment.isDebugMode()) {
+            HttpLoggingInterceptor loggingInterceptor = new HttpLoggingInterceptor();
+            loggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
+            builder.addInterceptor(loggingInterceptor);
+        }
         return builder
                 .addInterceptor(headerInterceptor)
 //                .addNetworkInterceptor(cacheInterceptor)   //addInterceptor 缓存不生效

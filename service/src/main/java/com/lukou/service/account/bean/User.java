@@ -1,4 +1,4 @@
-package com.sunbinqiang.drible.bean;
+package com.lukou.service.account.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;

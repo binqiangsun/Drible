@@ -1,12 +1,15 @@
 package com.sunbinqiang.drible.http;
 
+import com.lukou.service.account.bean.User;
 import com.sunbinqiang.drible.bean.Comment;
+import com.sunbinqiang.drible.bean.Token;
 import com.sunbinqiang.drible.db.entity.Shot;
 
 import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 import retrofit2.http.QueryMap;
@@ -31,5 +34,15 @@ public interface ApiService {
     Call<Comment[]> getComments(@Path("id") int id,
                                 @Query("page") int page);
 
+    @POST("https://dribbble.com/oauth/token")
+    Observable<Token> getToken(@Query("client_id") String clientId,
+                        @Query("client_secret") String clientSecret,
+                        @Query("code") String code);
+
+    @GET("user")
+    Observable<User> getUser(@Query("access_token") String token);
+
+    @GET("users/{id}")
+    Observable<User> getUser(@Path("id") int userId);
 
 }

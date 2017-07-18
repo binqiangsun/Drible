@@ -47,8 +47,8 @@ public class RetrofitUtils {
         return retrofit;
     }
 
-    protected <T> Observable.Transformer<HttpResult<T>, T> lifts() {
-        return (Observable.Transformer<HttpResult<T>, T>) transformer;
+    protected <T> Observable.Transformer<T, T> lifts() {
+        return (Observable.Transformer<T, T>) transformer;
     }
 
     private class RetrofitTransformer implements Transformer {
@@ -59,8 +59,7 @@ public class RetrofitUtils {
             return observable.subscribeOn(io())
                     .unsubscribeOn(io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .onErrorReturn(errorFunc)
-                    .map(func);
+                    .onErrorReturn(errorFunc);
         }
     }
 

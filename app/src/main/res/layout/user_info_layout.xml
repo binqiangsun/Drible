@@ -6,7 +6,7 @@
     <data>
         <variable
             name="user"
-            type="com.sunbinqiang.drible.bean.User"/>
+            type="com.lukou.service.account.bean.User"/>
     </data>
 
     <android.support.design.widget.CoordinatorLayout

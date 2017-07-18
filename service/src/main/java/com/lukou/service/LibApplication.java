@@ -12,6 +12,8 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
+import com.lukou.service.account.AccountService;
+
 
 public abstract class LibApplication extends Application {
 
@@ -75,4 +77,6 @@ public abstract class LibApplication extends Application {
     public Handler mainLooperHandler() {
         return mainLooperHandler;
     }
+
+    public abstract AccountService accountService();
 }

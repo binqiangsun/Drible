@@ -3,7 +3,6 @@ package com.lukou.service.list.adapter;
 import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.support.annotation.CallSuper;
 import android.support.annotation.Nullable;
 
 import com.lukou.service.http.Resource;
@@ -11,23 +10,28 @@ import com.lukou.service.http.Resource;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import rx.Observable;
+import rx.functions.Action1;
+
 /**
  * @author Sunbinqiang
  * 处理分页数据
+ * T : 列表的数据类型
  */
-public abstract class ListRecyclerViewAdapter<T, M> extends BaseListRecyclerViewAdapter {
+public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAdapter {
 
     private final ArrayList<T> list = new ArrayList<>();
     private String errorMsg;
     private LifecycleOwner lifecycleOwner;
-    private MutableLiveData<Resource<T[]>> liveDataList;
-    protected M viewModel;
 
-    public ListRecyclerViewAdapter(LifecycleOwner lifecycleOwner, MutableLiveData<Resource<T[]>> liveData, M viewModel){
+    /**
+     * 适配liveData的构造函数
+     * @param lifecycleOwner
+     * @param liveData
+     */
+    public ListRecyclerViewAdapter(LifecycleOwner lifecycleOwner, MutableLiveData<Resource<T[]>> liveData){
         this.lifecycleOwner = lifecycleOwner;
-        this.viewModel = viewModel;
-        liveDataList = liveData;
-        liveDataList.observe(lifecycleOwner, new Observer<Resource<T[]>>() {
+        liveData.observe(lifecycleOwner, new Observer<Resource<T[]>>() {
             @Override
             public void onChanged(@Nullable Resource<T[]> result) {
                 if (result.status == Resource.SUCCESS) {
@@ -39,9 +43,34 @@ public abstract class ListRecyclerViewAdapter<T, M> extends BaseListRecyclerView
         });
     }
 
+    /**
+     * 默认适配RxJava的构造函数
+     */
+    public ListRecyclerViewAdapter() {
+
+    }
+
+    /**
+     * 加载下一页
+     */
     @Override
     void loadNext() {
-        loadNext(nextPage);
+        Observable<T[]> observable = request(nextPage);
+        if (observable == null) {
+            //非RxJava请求方式
+            return ;
+        }
+        observable.subscribe(new Action1<T[]>() {
+            @Override
+            public void call(T[] ts) {
+                requestSuccess(ts);
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                requestFailed(throwable.getMessage());
+            }
+        });
     }
 
     @Override
@@ -49,35 +78,45 @@ public abstract class ListRecyclerViewAdapter<T, M> extends BaseListRecyclerView
         return list.size();
     }
 
-    private void loadNext(int nextIndex) {
-        request(nextIndex);
-    }
-
     /**
-     *
      * 列表api请求
      * @param nextId
      * @return
      */
-    protected abstract void request(int nextId);
+    protected abstract Observable<T[]> request(int nextId);
 
+    /**
+     * 请求成功
+     * @param list
+     */
     private void requestSuccess(T[] list){
         setResultList(list);
-        onRequestFinished();
     }
 
+    /**
+     * 请求失败
+     * @param errorMsg
+     */
     private void requestFailed(String errorMsg) {
-        errorMsg = errorMsg;
+        this.errorMsg = errorMsg;
         isError = true;
-        onRequestFinished();
     }
 
+    /**
+     * 添加列表数据
+     * @param list
+     * @param newCommingArray
+     */
     private void sortList(ArrayList<T> list, T[] newCommingArray) {
         if (newCommingArray != null) {
             list.addAll(Arrays.asList(newCommingArray));
         }
     }
 
+    /**
+     * 设置数据源
+     * @param resultList
+     */
     private void setResultList(T[] resultList) {
         if (resultList != null) {
             if (nextPage == 0) {
@@ -102,25 +141,8 @@ public abstract class ListRecyclerViewAdapter<T, M> extends BaseListRecyclerView
         }
     }
 
-    public void setEnd(boolean end) {
-        isEnd = end;
-    }
-
-    public ArrayList<T> getList() {
-        return list;
-    }
-
-    @CallSuper
-    protected void onRequestFinished() {
-
-    }
 
 
-    private void setError(String errorMsg) {
-        isError = true;
-        this.errorMsg = errorMsg;
-        notifyDataSetChanged();
-    }
 
     /**
      * 数据重置，刷新列表
@@ -140,19 +162,7 @@ public abstract class ListRecyclerViewAdapter<T, M> extends BaseListRecyclerView
         }
     }
 
-    public void removeItem(T item) {
-        int index = -1;
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).equals(item)) {
-                index = i;
-                break;
-            }
-        }
-        if (index > -1) {
-            list.remove(index);
-            index += getHeaderViewCount();
-            notifyItemRemoved(index);
-        }
+    public ArrayList<T> getList() {
+        return list;
     }
-
 }

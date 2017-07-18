@@ -7,9 +7,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 
+import com.lukou.service.account.bean.User;
 import com.sunbinqiang.drible.bean.ImageEntity;
 import com.sunbinqiang.drible.bean.SingleClassLoader;
-import com.sunbinqiang.drible.bean.User;
 
 import java.util.List;
 

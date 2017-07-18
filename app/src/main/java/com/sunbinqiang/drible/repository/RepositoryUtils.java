@@ -2,12 +2,18 @@ package com.sunbinqiang.drible.repository;
 
 import android.arch.lifecycle.MutableLiveData;
 
+import com.lukou.service.http.HttpException;
 import com.lukou.service.http.Resource;
 import com.lukou.service.http.RetrofitUtils;
 import com.sunbinqiang.drible.http.ApiService;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by sunbinqiang on 31/05/2017.
@@ -34,5 +40,17 @@ public class RepositoryUtils {
             }
         }
         return apiService;
+    }
+
+    public static <T> Observable<T> transform(Observable<T> o) {
+        return o.subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .onErrorReturn(new Func1<Throwable, T>() {
+                    @Override
+                    public T call(Throwable throwable) {
+                        throw new HttpException(400, throwable.getMessage());
+                    }
+                });
     }
 }

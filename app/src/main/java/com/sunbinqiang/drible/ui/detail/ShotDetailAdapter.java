@@ -12,17 +12,21 @@ import com.sunbinqiang.drible.bean.Comment;
 import com.sunbinqiang.drible.db.entity.Shot;
 import com.sunbinqiang.drible.viewmodel.ShotDetailViewModel;
 
+import rx.Observable;
+
 /**
  * Created by sunbinqiang on 15/06/2017.
  */
 
-public class ShotDetailAdapter extends ListRecyclerViewAdapter<Comment, ShotDetailViewModel> {
+public class ShotDetailAdapter extends ListRecyclerViewAdapter<Comment> {
 
     private Shot shot;
+    private ShotDetailViewModel mViewModel;
 
     public ShotDetailAdapter(LifecycleOwner lifecycleOwner,
-                             MutableLiveData<Resource<Comment[]>> liveData, ShotDetailViewModel commentViewModel) {
-        super(lifecycleOwner, liveData, commentViewModel);
+                             MutableLiveData<Resource<Comment[]>> liveData, ShotDetailViewModel viewModel) {
+        super(lifecycleOwner, liveData);
+        mViewModel = viewModel;
     }
 
     public void setShot(Shot shot) {
@@ -31,8 +35,9 @@ public class ShotDetailAdapter extends ListRecyclerViewAdapter<Comment, ShotDeta
 
 
     @Override
-    protected void request(int nextId) {
-        viewModel.getNextComments(this.shot.getId(), nextId);
+    protected Observable<Comment[]> request(int nextId) {
+        mViewModel.getNextComments(this.shot.getId(), nextId);
+        return null;
     }
 
     @Override

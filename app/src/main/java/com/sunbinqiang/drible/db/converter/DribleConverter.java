@@ -20,8 +20,8 @@ package com.sunbinqiang.drible.db.converter;
 import android.arch.persistence.room.TypeConverter;
 
 import com.google.gson.Gson;
+import com.lukou.service.account.bean.User;
 import com.sunbinqiang.drible.bean.ImageEntity;
-import com.sunbinqiang.drible.bean.User;
 
 import java.util.Date;
 
