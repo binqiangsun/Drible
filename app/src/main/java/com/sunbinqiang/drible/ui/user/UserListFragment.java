@@ -1,19 +1,17 @@
 package com.sunbinqiang.drible.ui.user;
 
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.MutableLiveData;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.view.ViewGroup;
 
 import com.lukou.service.account.bean.User;
-import com.lukou.service.http.Resource;
 import com.lukou.service.list.adapter.ListRecyclerViewAdapter;
 import com.lukou.service.list.viewholder.BaseViewHolder;
 import com.sunbinqiang.drible.R;
 import com.sunbinqiang.drible.base.BaseListFragment;
 import com.sunbinqiang.drible.databinding.UserViewHolderBinding;
+import com.sunbinqiang.drible.repository.RepositoryUtils;
 
 import rx.Observable;
 
@@ -45,8 +43,8 @@ public class UserListFragment extends BaseListFragment<User> {
         int type = getArguments().getInt("type");
         int userId = getArguments().getInt("userId");
 
-        UserListViewModel userListViewModel = new UserListViewModel();
-        return null;
+
+        return new UserAdapter(type, userId);
     }
 
     private static class UserAdapter extends ListRecyclerViewAdapter<User>{
@@ -54,13 +52,21 @@ public class UserListFragment extends BaseListFragment<User> {
         private int mType;
         private int mUserId;
 
-        public UserAdapter(LifecycleOwner lifecycleOwner, MutableLiveData<Resource<User[]>> liveData) {
-            super(lifecycleOwner, liveData);
+        public UserAdapter(int type, int userId) {
+            mType = type;
+            mUserId = userId;
         }
 
         @Override
         protected Observable<User[]> request(int nextId) {
-            return null;
+            switch (mType) {
+                case TYPE_FOLLOWER:
+                    return RepositoryUtils.getApiService().getFollowers(mUserId, String.valueOf(nextId));
+                case TYPE_FOLLOWING:
+                    return RepositoryUtils.getApiService().getFollowings(mUserId, String.valueOf(nextId));
+                default:
+                    return null;
+            }
         }
 
         @Override

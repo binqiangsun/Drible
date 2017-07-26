@@ -2,6 +2,10 @@ package com.sunbinqiang.drible.ui.user;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -11,10 +15,17 @@ import com.sunbinqiang.drible.bean.Token;
 import com.sunbinqiang.drible.repository.RepositoryUtils;
 import com.sunbinqiang.drible.ui.user.UserConstract.Presenter;
 import com.sunbinqiang.drible.util.Constants;
+import com.sunbinqiang.drible.util.TypeUtils;
+import com.sunbinqiang.drible.widget.ViewPageAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by sunbinqiang on 05/07/2017.
@@ -23,6 +34,7 @@ import rx.functions.Func1;
 public class UserPresenter implements Presenter {
 
     private UserConstract.View mView;
+    private User mUser;
 
     public UserPresenter(UserConstract.View view) {
         mView = view;
@@ -49,8 +61,8 @@ public class UserPresenter implements Presenter {
 
     @Override
     public void getUserByCode(String code) {
-        RepositoryUtils.transform(
-                RepositoryUtils.getApiService().getToken(Constants.CLIENT_ID, Constants.CLIENT_SCERET, code))
+
+        RepositoryUtils.getApiService().getToken(Constants.CLIENT_ID, Constants.CLIENT_SCERET, code)
                 .flatMap(new Func1<Token, Observable<User>>() {
                     @Override
                     public Observable<User> call(Token token) {
@@ -60,67 +72,82 @@ public class UserPresenter implements Presenter {
                         return RepositoryUtils.transform(RepositoryUtils.getApiService().getUser(token.getAccess_token()));
                     }
                 })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<User>() {
                     @Override
                     public void call(User user) {
+                        mUser = user;
+                        MainApplication.instance().accountService().saveUser(user);
                         mView.showUser(user);
                     }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+
+                    }
                 });
-//        RepositoryUtils.getApiService().getToken(Constants.CLIENT_ID, Constants.CLIENT_SCERET, code)
-////                .enqueue(new Callback<Token>() {
-////                    @Override
-////                    public void onResponse(Call<Token> call, Response<Token> response) {
-////                        Log.d(UserPresenter.this.getClass().getName(), response.message());
-////                        Token token = response.body();
-////
-////                        if (token != null) {
-////                            Log.d(UserPresenter.this.getClass().getName(), token.getAccess_token());
-////                        }
-////                    }
-////
-////                    @Override
-////                    public void onFailure(Call<Token> call, Throwable t) {
-////                        Log.d(UserPresenter.this.getClass().getName(), t.getMessage());
-////
-////                    }
-////                });
-//                .subscribe(new Action1<Token>() {
-//                    @Override
-//                    public void call(Token token) {
-//                        Log.d(UserPresenter.this.getClass().getName(), token.getAccess_token());
-//                    }
-//                }, new Action1<Throwable>() {
-//                    @Override
-//                    public void call(Throwable throwable) {
-//                        Log.d(UserPresenter.this.getClass().getName(), throwable.getMessage());
-//                    }
-//                });
-//                .flatMap(new Func1<Token, Observable<User>>() {
-//                    @Override
-//                    public Observable<User> call(Token token) {
-//                        //保存token
-//                        Log.d(UserPresenter.this.getClass().getName(), token.getAccess_token());
-//                        MainApplication.instance().accountService().saveToken(token.getAccess_token());
-//                        return RepositoryUtils.getApiService().getUser(token.getAccess_token());
-//                    }
-//
-//                })
-//                .subscribe(new Action1<User>() {
-//                    @Override
-//                    public void call(User user) {
-//                        mView.showUser(user);
-//                    }
-//                });
     }
 
     @Override
     public void getUserById(int userId) {
-
+        RepositoryUtils.getApiService().getUser(userId)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<User>() {
+                    @Override
+                    public void call(User user) {
+                        mUser = user;
+                        mView.showUser(user);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                    }
+                });
     }
 
     @Override
     public void getProfileUser() {
+        //
+        if (MainApplication.instance().accountService().isLogin() &&
+                MainApplication.instance().accountService().user() != null) {
+            mUser = MainApplication.instance().accountService().user();
+            mView.showUser(mUser);
+        } else {
+            login();
+        }
+    }
 
+    private void login() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("drible://login"));
+        intent.putExtra("url", "https://dribbble.com/oauth/authorize");
+        mView.startOtherActivity(intent);
+    }
+
+    @Override
+    public void setTabViewPager(FragmentManager fragmentManager, TabLayout tabLayout, ViewPager viewPager){
+
+        ViewPageAdapter viewPageAdapter = new ViewPageAdapter(fragmentManager);
+
+        List<Fragment> fragmentList = new ArrayList<>();
+        fragmentList.add(UserShotFragment.newInstance(TypeUtils.SHOT_SHOTS, mUser.getId()));
+        fragmentList.add(UserShotFragment.newInstance(TypeUtils.SHOT_LIKES, mUser.getId()));
+
+        fragmentList.add(UserListFragment.newInstance(UserListFragment.TYPE_FOLLOWER, mUser.getId()));
+        fragmentList.add(UserListFragment.newInstance(UserListFragment.TYPE_FOLLOWING, mUser.getId()));
+        viewPageAdapter.setFragments(fragmentList);
+
+        List<String> titles = new ArrayList<>();
+        titles.add("ALL");
+        titles.add("LIKES");
+        titles.add("FOLLOWERS");
+        titles.add("FOLLOWINGS");
+
+        viewPageAdapter.setTitles(titles);
+
+        viewPager.setAdapter(viewPageAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+        viewPager.setOffscreenPageLimit(fragmentList.size());
     }
 
 

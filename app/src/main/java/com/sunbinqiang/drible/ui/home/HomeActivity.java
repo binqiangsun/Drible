@@ -18,8 +18,8 @@ import android.widget.ViewFlipper;
 import com.sunbinqiang.drible.R;
 import com.sunbinqiang.drible.base.BaseActivity;
 import com.sunbinqiang.drible.databinding.HomeActivityBinding;
-import com.sunbinqiang.drible.ui.login.LoginWebActivity;
 import com.sunbinqiang.drible.ui.selected.SelectedShotFragment;
+import com.sunbinqiang.drible.ui.user.UserInfoActivity;
 
 public class HomeActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -89,8 +89,7 @@ public class HomeActivity extends BaseActivity
         navigationView.getHeaderView(0).findViewById(R.id.author_iv).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, LoginWebActivity.class);
-                intent.putExtra("url", "https://dribbble.com/oauth/authorize");
+                Intent intent = new Intent(HomeActivity.this, UserInfoActivity.class);
                 startActivity(intent);
             }
         });

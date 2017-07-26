@@ -11,12 +11,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * @author Sunbinqiang
- * 处理分页数据
- * T : 列表的数据类型
+ *         处理分页数据
+ *         T : 列表的数据类型
  */
 public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAdapter {
 
@@ -26,10 +28,11 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
 
     /**
      * 适配liveData的构造函数
+     *
      * @param lifecycleOwner
      * @param liveData
      */
-    public ListRecyclerViewAdapter(LifecycleOwner lifecycleOwner, MutableLiveData<Resource<T[]>> liveData){
+    public ListRecyclerViewAdapter(LifecycleOwner lifecycleOwner, MutableLiveData<Resource<T[]>> liveData) {
         this.lifecycleOwner = lifecycleOwner;
         liveData.observe(lifecycleOwner, new Observer<Resource<T[]>>() {
             @Override
@@ -58,19 +61,21 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
         Observable<T[]> observable = request(nextPage);
         if (observable == null) {
             //非RxJava请求方式
-            return ;
+            return;
         }
-        observable.subscribe(new Action1<T[]>() {
-            @Override
-            public void call(T[] ts) {
-                requestSuccess(ts);
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                requestFailed(throwable.getMessage());
-            }
-        });
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<T[]>() {
+                    @Override
+                    public void call(T[] ts) {
+                        requestSuccess(ts);
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        requestFailed(throwable.getMessage());
+                    }
+                });
     }
 
     @Override
@@ -80,6 +85,7 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
 
     /**
      * 列表api请求
+     *
      * @param nextId
      * @return
      */
@@ -87,14 +93,16 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
 
     /**
      * 请求成功
+     *
      * @param list
      */
-    private void requestSuccess(T[] list){
+    private void requestSuccess(T[] list) {
         setResultList(list);
     }
 
     /**
      * 请求失败
+     *
      * @param errorMsg
      */
     private void requestFailed(String errorMsg) {
@@ -104,6 +112,7 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
 
     /**
      * 添加列表数据
+     *
      * @param list
      * @param newCommingArray
      */
@@ -115,13 +124,14 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
 
     /**
      * 设置数据源
+     *
      * @param resultList
      */
     private void setResultList(T[] resultList) {
         if (resultList != null) {
             if (nextPage == 0) {
                 //刷新， 对比原来的数据
-                if(!Arrays.equals(list.toArray(), resultList)){
+                if (!Arrays.equals(list.toArray(), resultList)) {
                     list.clear();
                     sortList(list, resultList);
                     notifyItemRangeChanged(0, getItemCount());
@@ -137,11 +147,9 @@ public abstract class ListRecyclerViewAdapter<T> extends BaseListRecyclerViewAda
                 sortList(list, resultList);
                 notifyItemInserted(insertPosition);
             }
-            nextPage ++;
+            nextPage++;
         }
     }
-
-
 
 
     /**
