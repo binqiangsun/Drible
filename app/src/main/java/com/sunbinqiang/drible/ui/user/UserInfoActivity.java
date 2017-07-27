@@ -22,7 +22,6 @@ public class UserInfoActivity extends BaseActivity implements UserConstract.View
     //其他人个人主页
     public static void startUserInfoActivity(Context context, int userId) {
         Intent intent = new Intent(context, UserInfoActivity.class);
-        intent.putExtra("other", true);
         intent.putExtra("userId", userId);
         context.startActivity(intent);
     }

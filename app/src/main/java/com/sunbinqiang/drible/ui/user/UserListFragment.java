@@ -3,6 +3,7 @@ package com.sunbinqiang.drible.ui.user;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ViewGroup;
 
 import com.lukou.service.account.bean.User;
@@ -10,10 +11,13 @@ import com.lukou.service.list.adapter.ListRecyclerViewAdapter;
 import com.lukou.service.list.viewholder.BaseViewHolder;
 import com.sunbinqiang.drible.R;
 import com.sunbinqiang.drible.base.BaseListFragment;
+import com.sunbinqiang.drible.bean.FolloweeResult;
+import com.sunbinqiang.drible.bean.FollowerResult;
 import com.sunbinqiang.drible.databinding.UserViewHolderBinding;
 import com.sunbinqiang.drible.repository.RepositoryUtils;
 
 import rx.Observable;
+import rx.functions.Func1;
 
 
 /**
@@ -61,9 +65,31 @@ public class UserListFragment extends BaseListFragment<User> {
         protected Observable<User[]> request(int nextId) {
             switch (mType) {
                 case TYPE_FOLLOWER:
-                    return RepositoryUtils.getApiService().getFollowers(mUserId, String.valueOf(nextId));
+                    return RepositoryUtils.getApiService()
+                            .getFollowers(mUserId, String.valueOf(nextId))
+                            .map(new Func1<FollowerResult[], User[]>() {
+                                @Override
+                                public User[] call(FollowerResult[] followerResults) {
+                                    User[] users = new User[followerResults.length];
+                                    for (int i = 0; i < followerResults.length; i ++) {
+                                        users[i] = followerResults[i].getFollower();
+                                    }
+                                    return users;
+                                }
+                            });
                 case TYPE_FOLLOWING:
-                    return RepositoryUtils.getApiService().getFollowings(mUserId, String.valueOf(nextId));
+                    return RepositoryUtils.getApiService()
+                            .getFollowings(mUserId, String.valueOf(nextId))
+                            .map(new Func1<FolloweeResult[], User[]>() {
+                                @Override
+                                public User[] call(FolloweeResult[] followerResults) {
+                                    User[] users = new User[followerResults.length];
+                                    for (int i = 0; i < followerResults.length; i ++) {
+                                        users[i] = followerResults[i].getFollowee();
+                                    }
+                                    return users;
+                                }
+                            });
                 default:
                     return null;
             }
@@ -90,6 +116,7 @@ public class UserListFragment extends BaseListFragment<User> {
         }
 
         public void setUser(User user){
+            Log.d("userlist", user.toJsonString());
             mBinding.setUser(user);
         }
 

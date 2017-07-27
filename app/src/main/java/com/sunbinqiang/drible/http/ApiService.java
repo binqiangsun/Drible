@@ -2,6 +2,8 @@ package com.sunbinqiang.drible.http;
 
 import com.lukou.service.account.bean.User;
 import com.sunbinqiang.drible.bean.Comment;
+import com.sunbinqiang.drible.bean.FolloweeResult;
+import com.sunbinqiang.drible.bean.FollowerResult;
 import com.sunbinqiang.drible.bean.ShotResult;
 import com.sunbinqiang.drible.bean.Token;
 import com.sunbinqiang.drible.db.entity.Shot;
@@ -47,11 +49,11 @@ public interface ApiService {
     Observable<User> getUser(@Path("id") int userId);
 
     @GET("users/{id}/followers")
-    Observable<User[]> getFollowers(@Path("id") int id,
-                                    @Query("page") String page);
+    Observable<FollowerResult[]> getFollowers(@Path("id") int id,
+                                              @Query("page") String page);
     @GET("users/{id}/following")
-    Observable<User[]> getFollowings(@Path("id") int id,
-                                     @Query("page") String page);
+    Observable<FolloweeResult[]> getFollowings(@Path("id") int id,
+                                               @Query("page") String page);
 
     @GET("users/{id}/likes")
     Observable<ShotResult[]> getLikes(@Path("id") int id,

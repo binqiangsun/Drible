@@ -11,6 +11,7 @@ import com.lukou.service.list.viewholder.BaseViewHolder;
 import com.sunbinqiang.drible.R;
 import com.sunbinqiang.drible.databinding.ShotInfoHeadViewBinding;
 import com.sunbinqiang.drible.db.entity.Shot;
+import com.sunbinqiang.drible.ui.user.UserInfoActivity;
 
 /**
  * Created by sunbinqiang on 6/18/16.
@@ -38,7 +39,10 @@ public class ShotInfoHeaderViewHolder extends BaseViewHolder {
         binding.setClickHandlers(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //
+                switch (view.getId()) {
+                    case R.id.author_drawee_view :
+                        UserInfoActivity.startUserInfoActivity(getContext(), mShot.getUser().getId());
+                }
             }
         });
         binding.executePendingBindings();

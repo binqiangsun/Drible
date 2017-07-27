@@ -27,6 +27,7 @@
             android:layout_height="35dp"
             app:imageUrl="@{comment.user.avatar_url}"
             app:enableCircle="true"
+            android:onClick="@{clickHandlers}"
             android:layout_gravity="top"/>
 
         <LinearLayout

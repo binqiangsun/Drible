@@ -37,6 +37,7 @@
                     android:layout_height="96dp"
                     android:layout_gravity="center"
                     android:layout_margin="10dp"
+                    app:enableCircle="true"
                     app:imageUrl="@{user.avatar_url}"/>
 
                 <TextView

@@ -92,6 +92,7 @@ public class UserPresenter implements Presenter {
     @Override
     public void getUserById(int userId) {
         RepositoryUtils.getApiService().getUser(userId)
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Action1<User>() {
                     @Override

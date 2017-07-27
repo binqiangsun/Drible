@@ -89,8 +89,7 @@ public class HomeActivity extends BaseActivity
         navigationView.getHeaderView(0).findViewById(R.id.author_iv).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomeActivity.this, UserInfoActivity.class);
-                startActivity(intent);
+                UserInfoActivity.startProfileActivity(HomeActivity.this);
             }
         });
 
